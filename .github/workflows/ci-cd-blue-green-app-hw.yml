@@ -75,7 +75,7 @@ jobs:
       needs: build
 
       env:
-        AWS_CLUSTER_NAME: test-cluster
+        AWS_CLUSTER_NAME: uku-cluster
         AWS_REGION: us-central1
 
       steps:
