@@ -74,7 +74,7 @@ jobs:
     needs: build
 
     env:
-      AWS_CLUSTER_NAME: uku-cluster
+      AWS_CLUSTER_NAME: uku2-cluster
       AWS_REGION: us-east-1
 
     steps:
@@ -101,7 +101,7 @@ jobs:
 
       - name: Update kube config
         run: |
-          mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+#          mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
           aws eks update-kubeconfig --name ${{ env.AWS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
 #      - name: Install kubectl
