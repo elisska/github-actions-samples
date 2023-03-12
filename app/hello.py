@@ -7,7 +7,7 @@ config.read('config.properties')
 app = Flask(__name__)
 
 if config.getboolean("features", "feature_1") == True:
-	message = "Hello, Sasha!"
+	message = "Salut, Nazar!"
 else:
 	message = "Hello, World!"
 
