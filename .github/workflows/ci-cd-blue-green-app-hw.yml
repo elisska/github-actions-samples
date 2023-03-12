@@ -103,10 +103,7 @@ jobs:
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           echo ${{ secrets.KUBECONFIG }} | base64 --decode > kubeconfig.yaml
-          
-          cp /etc/kubernetes/admin.conf $HOME/
-          chown $(id -u):$(id -g) $HOME/admin.conf
-          export KUBECONFIG=$HOME/admin.conf
+          export KUBECONFIG=kubeconfig.yaml
 
 
       - name: Create namespace & set in Kustomize
