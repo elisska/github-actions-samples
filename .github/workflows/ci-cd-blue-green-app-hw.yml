@@ -68,94 +68,93 @@ jobs:
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
 
-
   deploy: # cd
     name: Deploy
-      runs-on: ubuntu-latest
-      needs: build
+    runs-on: ubuntu-latest
+    needs: build
 
-      env:
-        AWS_CLUSTER_NAME: uku-cluster
-        AWS_REGION: us-central1
+    env:
+      AWS_CLUSTER_NAME: uku-cluster
+      AWS_REGION: us-central1
 
-      steps:
-        - name: Check out code
-          uses: actions/checkout@v2
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
 
-        - name: Setup Kustomize
-          uses: imranismail/setup-kustomize@v1
-          with:
-            kustomize-version: "3.6.1"
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+        with:
+          kustomize-version: "3.6.1"
 
-        - name: AWS credentials
-          uses: aws-actions/configure-aws-credentials@v1
-          with:
-            aws-access-key-id: ${{ secrets.MY_AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.MY_AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ env.AWS_REGION }}
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.MY_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.MY_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-        - name: Enable kubectl for ${{ env.AWS_CLUSTER_NAME }}
-          uses: ianbelcher/eks-kubectl-action@master
-          with:
-            cluster_name: ${{ env.AWS_CLUSTER_NAME }}
+      - name: Enable kubectl for ${{ env.AWS_CLUSTER_NAME }}
+        uses: ianbelcher/eks-kubectl-action@master
+        with:
+          cluster_name: ${{ env.AWS_CLUSTER_NAME }}
 
-        - name: Create namespace & set in Kustomize
-          run: |
-            namespacePresentBlue=`kubectl get ns | grep python-app-blue | wc -l`
-            namespacePresentGreen=`kubectl get ns | grep python-app-green | wc -l`
-            if [ $namespacePresentBlue -eq 0 ]
-            then
-               kubectl create ns python-app-blue
-               cd k8s
-               kustomize edit set namespace python-app-blue
-               echo "NEW_NAMESPACE=python-app-blue" >> $GITHUB_ENV
-               echo "OLD_NAMESPACE=python-app-green" >> $GITHUB_ENV
-            elif [ $namespacePresentGreen -eq 0 ]
-            then
-               kubectl create ns python-app-green
-               cd k8s
-               kustomize edit set namespace python-app-green
-               echo "NEW_NAMESPACE=python-app-green" >> $GITHUB_ENV
-               echo "OLD_NAMESPACE=python-app-blue" >> $GITHUB_ENV
-            else
-               echo "Both Blue and Green namespaces are present! Exiting"
-               exit 1
-            fi
+      - name: Create namespace & set in Kustomize
+        run: |
+          namespacePresentBlue=`kubectl get ns | grep python-app-blue | wc -l`
+          namespacePresentGreen=`kubectl get ns | grep python-app-green | wc -l`
+          if [ $namespacePresentBlue -eq 0 ]
+          then
+             kubectl create ns python-app-blue
+             cd k8s
+             kustomize edit set namespace python-app-blue
+             echo "NEW_NAMESPACE=python-app-blue" >> $GITHUB_ENV
+             echo "OLD_NAMESPACE=python-app-green" >> $GITHUB_ENV
+          elif [ $namespacePresentGreen -eq 0 ]
+          then
+             kubectl create ns python-app-green
+             cd k8s
+             kustomize edit set namespace python-app-green
+             echo "NEW_NAMESPACE=python-app-green" >> $GITHUB_ENV
+             echo "OLD_NAMESPACE=python-app-blue" >> $GITHUB_ENV
+          else
+             echo "Both Blue and Green namespaces are present! Exiting"
+             exit 1
+          fi
 
-        - name: Update Kubernetes resources
-          env:
-            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          run: |
-            cd k8s
-            kustomize edit set image hello-gitops=$DOCKER_USERNAME/hello-gitops:$GITHUB_SHA
-            cat kustomization.yaml
+      - name: Update Kubernetes resources
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        run: |
+          cd k8s
+          kustomize edit set image hello-gitops=$DOCKER_USERNAME/hello-gitops:$GITHUB_SHA
+          cat kustomization.yaml
 
-        - name: Deploy updated Kubernetes resources
-          run: |
-            kubectl apply -k k8s/ 
+      - name: Deploy updated Kubernetes resources
+        run: |
+          kubectl apply -k k8s/ 
 
-        # DO SOME CHECKS HERE BEFORE COMMIT
-        #- name: Deploy updated Kubernetes resources
-        #  run: |
-        #    kubectl apply -k k8s/
+      # DO SOME CHECKS HERE BEFORE COMMIT
+      #- name: Deploy updated Kubernetes resources
+      #  run: |
+      #    kubectl apply -k k8s/
 
-        # REMOVE OLD DEPLOYMENT!!
-        - name: Remove old namespace
-          run: |
-            namespacePresentOld=`kubectl get ns | grep ${{ env.OLD_NAMESPACE }} | wc -l`
-            if [ $namespacePresentOld -eq 1 ]
-            then
-              kubectl delete ns ${{ env.OLD_NAMESPACE }} --wait=true
-            fi
+      # REMOVE OLD DEPLOYMENT!!
+      - name: Remove old namespace
+        run: |
+          namespacePresentOld=`kubectl get ns | grep ${{ env.OLD_NAMESPACE }} | wc -l`
+          if [ $namespacePresentOld -eq 1 ]
+          then
+            kubectl delete ns ${{ env.OLD_NAMESPACE }} --wait=true
+          fi
 
-        - name: Commit files
-          run: |
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git commit -am "Bump docker tag"
+      - name: Commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Bump docker tag"
 
-        - name: Push changes
-          uses: ad-m/github-push-action@master
-          with:
-            github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
