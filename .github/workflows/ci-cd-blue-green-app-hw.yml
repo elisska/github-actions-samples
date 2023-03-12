@@ -93,10 +93,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.MY_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Enable kubectl for ${{ env.AWS_CLUSTER_NAME }}
-        uses: ianbelcher/eks-kubectl-action@master
-        with:
-          cluster_name: ${{ env.AWS_CLUSTER_NAME }}
+      - name: Install and configure kubectl
+        run: |
+        VERSION=$(curl --silent https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+        curl https://storage.googleapis.com/kubernetes-release/release/$VERSION/bin/linux/amd64/kubectl \
+            --progress-bar \
+            --location \
+            --remote-name
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+        echo ${{ secrets.KUBECONFIG }} | base64 --decode > kubeconfig.yaml
+
 
       - name: Create namespace & set in Kustomize
         run: |
