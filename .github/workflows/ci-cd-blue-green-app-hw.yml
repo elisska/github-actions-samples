@@ -88,8 +88,6 @@ jobs:
 
       - name: Install Kubectl (Az)
         uses: azure/setup-kubectl@v3
-#        with:
-#          version: '<version>' # default is latest stable
         id: install
 
       - name: AWS credentials
