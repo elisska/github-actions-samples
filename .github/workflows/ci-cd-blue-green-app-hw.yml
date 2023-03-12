@@ -75,7 +75,7 @@ jobs:
 
     env:
       AWS_CLUSTER_NAME: uku-cluster
-      AWS_REGION: us-central1
+      AWS_REGION: us-central-1
 
     steps:
       - name: Check out code
