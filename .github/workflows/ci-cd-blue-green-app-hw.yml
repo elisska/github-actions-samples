@@ -101,7 +101,6 @@ jobs:
 
       - name: Update kube config
         run: |
-#          mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
           aws eks update-kubeconfig --name ${{ env.AWS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
 #      - name: Install kubectl
