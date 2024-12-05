@@ -24,7 +24,7 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: "3.10"
+        python-version: "v3.10"
         
     - name: Install dependencies
       run: |
@@ -92,7 +92,7 @@ jobs:
     - name: Setup Kustomize
       uses: imranismail/setup-kustomize@v1
       with:
-        kustomize-version: "3.6.1"
+        kustomize-version: "v3.6.1"
 
     # Alternative option - authentication via credentials json
     - name: Authenticate to Google Cloud
