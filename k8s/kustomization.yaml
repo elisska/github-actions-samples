@@ -8,4 +8,4 @@ namespace: hello-gitops
 images:
 - name: hello-gitops
   newName: elisska/hello-gitops
-  newTag: e437eab09cd44534db7d047f3e778dd364da2104
+  newTag: 1153e4c4a38723e74e1cf526f82af4a35553769b
