@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-blue
+  namespace: blue-green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-app
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: demo-app
+        version: blue
+    spec:
+      containers:
+        - name: app
+          image: mromanets/hello-gitops:latest
+          ports:
+            - containerPort: 8050
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8050
+            initialDelaySeconds: 5
+            periodSeconds: 5
